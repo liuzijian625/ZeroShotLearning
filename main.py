@@ -11,7 +11,7 @@ from sklearn.linear_model import LinearRegression
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Add args to the model")
-    parser.add_argument("--normalize", type=bool, default=False, help="Normalization the datas")
+    parser.add_argument("--normalize", type=bool, default=True, help="Normalization the datas")
     parser.add_argument("--method_of_dimension_reduction", type=str, default="PCA",
                         help="Method of dimension reduction")
     parser.add_argument("--method_of_normalization", type=str, default="min_max",
@@ -25,6 +25,10 @@ def parse_args():
 
 
 class MinMax(object):
+    def __init__(self):
+        self.max = 0
+        self.min = 0
+
     def fit(self, data: dict):
         self.min = data[list(data.keys())[0]][0].min()
         self.max = data[list(data.keys())[0]][0].max()
@@ -45,6 +49,10 @@ class MinMax(object):
 
 
 class ZScore(object):
+    def __init__(self):
+        self.mean = 0
+        self.var = 0
+
     def fit(self, data: dict):
         data_process = []
         for key in data:
@@ -136,9 +144,12 @@ class FeatureExtraction(object):
         for key in data:
             for i in range(len(data[key])):
                 test_data.append(data[key][i].squeeze())
+        data_feature = self.model.predict(test_data)
+        return data_feature
 
 
 def get_train_test(data: dict, method_of_experiment: str):
+    random_list = []
     if method_of_experiment == 'leave 2 out':
         random1 = random.randint(0, 59)
         random2 = random.randint(0, 59)
@@ -159,6 +170,38 @@ def get_train_test(data: dict, method_of_experiment: str):
     return train_data, test_data
 
 
+def classfication(feature, word2features: dict):
+    min_distance = np.linalg.norm(feature - word2features[list(word2features.keys())[0]])
+    min_key = list(word2features.keys())[0]
+    for key in word2features:
+        distance = np.linalg.norm(feature - word2features[key])
+        if distance < min_distance:
+            min_distance = distance
+            min_key = key
+    return min_key
+
+
+def test(test_data: dict, feature_extraction: FeatureExtraction, word2features: dict, method_of_experiment: str):
+    right_num = 0
+    total_num = 0
+    test_feature = feature_extraction.predict(test_data)
+    if method_of_experiment == 'leave 2 out':
+        part_of_word2features = dict()
+        key_list = list(test_data.keys())
+        for key in key_list:
+            part_of_word2features[key] = word2features[key]
+        j = 0
+        for key in test_data:
+            for i in range(len(test_data[key])):
+                feature_key = classfication(test_feature[j], part_of_word2features)
+                j = j + 1
+                total_num = total_num + 1
+                if feature_key == key:
+                    right_num = right_num + 1
+        acc = (right_num / total_num) * 100
+        return acc
+
+
 def train_and_test(data: dict, word2features: dict, verbs: list, normalize: bool, method_of_dimension_reduction: str,
                    method_of_normalization: str, method_of_feature_extraction: str, method_of_experiment: str):
     train_data, test_data = get_train_test(data, method_of_experiment)
@@ -173,7 +216,8 @@ def train_and_test(data: dict, word2features: dict, verbs: list, normalize: bool
     test_data = dimension_reduction.transform(test_data)
     feature_extraction = FeatureExtraction(method_of_feature_extraction, word2features)
     feature_extraction.fit(train_data)
-    return 1
+    acc = test(test_data, feature_extraction, word2features, method_of_experiment)
+    return acc
 
 
 if __name__ == '__main__':
@@ -201,3 +245,5 @@ if __name__ == '__main__':
     for i in range(len(datas)):
         acc = train_and_test(datas[i], word2features, verbs, normalize, method_of_dimension_reduction,
                              method_of_normalization, method_of_feature_extraction, method_of_experiment)
+        accs.append(acc)
+    print(accs)
