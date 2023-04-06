@@ -18,7 +18,7 @@ def parse_args():
                         help="Method of normalization")
     parser.add_argument("--method_of_feature_extraction", type=str, default="linear_regression",
                         help="Method of feature extraction")
-    parser.add_argument("--method_of_experiment", type=str, default="leave 2 out",
+    parser.add_argument("--method_of_experiment", type=str, default="leave 1 out",
                         help="Method of experiment")
     args = parser.parse_args()
     return args
@@ -170,7 +170,7 @@ def get_train_test(data: dict, method_of_experiment: str):
     return train_data, test_data
 
 
-def classfication(feature, word2features: dict):
+def classification(feature, word2features: dict):
     min_distance = np.linalg.norm(feature - word2features[list(word2features.keys())[0]])
     min_key = list(word2features.keys())[0]
     for key in word2features:
@@ -193,13 +193,23 @@ def test(test_data: dict, feature_extraction: FeatureExtraction, word2features: 
         j = 0
         for key in test_data:
             for i in range(len(test_data[key])):
-                feature_key = classfication(test_feature[j], part_of_word2features)
+                feature_key = classification(test_feature[j], part_of_word2features)
                 j = j + 1
                 total_num = total_num + 1
                 if feature_key == key:
                     right_num = right_num + 1
         acc = (right_num / total_num) * 100
-        return acc
+    elif method_of_experiment=='leave 1 out':
+        j = 0
+        for key in test_data:
+            for i in range(len(test_data[key])):
+                feature_key = classification(test_feature[j],word2features)
+                j = j + 1
+                total_num = total_num + 1
+                if feature_key == key:
+                    right_num = right_num + 1
+        acc = (right_num / total_num) * 100
+    return acc
 
 
 def train_and_test(data: dict, word2features: dict, verbs: list, normalize: bool, method_of_dimension_reduction: str,
