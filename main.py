@@ -54,7 +54,7 @@ class LinearModule(nn.Module):
 
 
 def parse_args():
-    #添加训练参数
+    # 添加训练参数
     parser = argparse.ArgumentParser(description="Add args to the model")
     parser.add_argument("--normalize", type=bool, default=True, help="Normalization the datas")
     parser.add_argument("--method_of_dimension_reduction", type=str, default="KernelPCA",
@@ -72,13 +72,13 @@ def parse_args():
 
 
 class MinMax(object):
-    #min_max归一化
+    # min_max归一化
     def __init__(self):
         self.max = 0
         self.min = 0
 
     def fit(self, data: dict):
-        #求得数据中最大最小数据
+        # 求得数据中最大最小数据
         self.min = data[list(data.keys())[0]][0].min()
         self.max = data[list(data.keys())[0]][0].max()
         for key in data:
@@ -91,7 +91,7 @@ class MinMax(object):
                     self.min = data_min
 
     def process(self, data: dict):
-        #对数据进行归一化操作
+        # 对数据进行归一化操作
         for key in data:
             for i in range(len(data[key])):
                 data[key][i] = (data[key][i] - self.min) / (self.max - self.min)
@@ -99,13 +99,13 @@ class MinMax(object):
 
 
 class ZScore(object):
-    #z_scire归一化
+    # z_scire归一化
     def __init__(self):
         self.mean = 0
         self.var = 0
 
     def fit(self, data: dict):
-        #求得数据的平均值和方差
+        # 求得数据的平均值和方差
         data_process = []
         for key in data:
             for i in range(len(data[key])):
@@ -115,7 +115,7 @@ class ZScore(object):
         self.var = data_process.var()
 
     def process(self, data: dict):
-        #对数据进行归一化
+        # 对数据进行归一化
         for key in data:
             for i in range(len(data[key])):
                 data[key][i] = (data[key][i] - self.mean) / (math.sqrt(self.var))
@@ -123,7 +123,7 @@ class ZScore(object):
 
 
 class Norm(object):
-    #对两种归一化操作统一接口
+    # 对两种归一化操作统一接口
     def __init__(self, method_of_normalization: str):
         if method_of_normalization == 'min_max':
             self.normalization = MinMax()
@@ -138,12 +138,12 @@ class Norm(object):
 
 
 class PCADimensionReduction(object):
-    #PCA降维
+    # PCA降维
     def __init__(self):
         self.pca = PCA(n_components=0.99)
 
     def fit(self, data: dict):
-        #拟合PCA
+        # 拟合PCA
         data_process = []
         for key in data:
             for i in range(len(data[key])):
@@ -153,7 +153,7 @@ class PCADimensionReduction(object):
         self.pca.fit(data_process)
 
     def transform(self, data: dict):
-        #用PCA对数据进行降维
+        # 用PCA对数据进行降维
         data_process = []
         for key in data:
             for i in range(len(data[key])):
@@ -170,12 +170,12 @@ class PCADimensionReduction(object):
 
 
 class KernelPCADimensionReduction(object):
-    #KernelPCA降维
+    # KernelPCA降维
     def __init__(self):
         self.pca = KernelPCA()
 
     def fit(self, data: dict):
-        #拟合KernelPCA
+        # 拟合KernelPCA
         data_process = []
         for key in data:
             for i in range(len(data[key])):
@@ -185,7 +185,7 @@ class KernelPCADimensionReduction(object):
         self.pca.fit(data_process)
 
     def transform(self, data: dict):
-        #用KernelPCA对数据降维
+        # 用KernelPCA对数据降维
         data_process = []
         for key in data:
             for i in range(len(data[key])):
@@ -202,12 +202,12 @@ class KernelPCADimensionReduction(object):
 
 
 class FADimensionReduction(object):
-    #Factor Analysis降维
+    # Factor Analysis降维
     def __init__(self):
         self.fa = FactorAnalysis(n_components=300)
 
     def fit(self, data: dict):
-        #拟合Factor Analysis
+        # 拟合Factor Analysis
         data_process = []
         for key in data:
             for i in range(len(data[key])):
@@ -217,7 +217,7 @@ class FADimensionReduction(object):
         self.fa.fit(data_process)
 
     def transform(self, data: dict):
-        #利用Factor Analysis对数据降维
+        # 利用Factor Analysis对数据降维
         data_process = []
         for key in data:
             for i in range(len(data[key])):
@@ -234,12 +234,12 @@ class FADimensionReduction(object):
 
 
 class FastICAimensionReduction(object):
-    #FastICA降维
+    # FastICA降维
     def __init__(self):
         self.fastICA = FastICA(n_components=200)
 
     def fit(self, data: dict):
-        #拟合fastICA
+        # 拟合fastICA
         data_process = []
         for key in data:
             for i in range(len(data[key])):
@@ -249,7 +249,7 @@ class FastICAimensionReduction(object):
         self.fastICA.fit(data_process)
 
     def transform(self, data: dict):
-        #利用fastICA对数据降维
+        # 利用fastICA对数据降维
         data_process = []
         for key in data:
             for i in range(len(data[key])):
@@ -266,7 +266,7 @@ class FastICAimensionReduction(object):
 
 
 class DimensionReduction(object):
-    #整合四种降维方式，统一接口
+    # 整合四种降维方式，统一接口
     def __init__(self, method_of_dimension_reduction: str):
         if method_of_dimension_reduction == 'PCA':
             self.dimension_reduction = PCADimensionReduction()
@@ -285,9 +285,9 @@ class DimensionReduction(object):
 
 
 class LinearFeatureExtraction(object):
-    #将全连接神经网络接口与回归模型接口进行统一
+    # 将全连接神经网络接口与回归模型接口进行统一
     def fit(self, train_data, train_label):
-        #训练模型
+        # 训练模型
         self.module = LinearModule(len(train_data[0]))
         train_dataset = MyDataset(train_data, train_label)
         train_data_loader = DataLoader(dataset=train_dataset, batch_size=16, shuffle=True,
@@ -305,12 +305,12 @@ class LinearFeatureExtraction(object):
                 optimizer.step()
 
     def predict(self, test_data):
-        #提取特征
+        # 提取特征
         return np.array(self.module(torch.Tensor(np.array(test_data))).detach())
 
 
 class FeatureExtraction(object):
-    #整合五种特征提取方式，统一接口
+    # 整合五种特征提取方式，统一接口
     def __init__(self, method_of_feature_extraction, word2features: dict):
         self.word2features = word2features
         if method_of_feature_extraction == 'linear_regression':
@@ -326,7 +326,7 @@ class FeatureExtraction(object):
             self.model = ElasticNet(alpha=0.3, l1_ratio=0.2)
 
     def fit(self, data: dict):
-        #训练数据
+        # 训练数据
         train_data = []
         train_label = []
         for key in data:
@@ -336,7 +336,7 @@ class FeatureExtraction(object):
         self.model.fit(train_data, train_label)
 
     def predict(self, data: dict):
-        #提取特征
+        # 提取特征
         test_data = []
         for key in data:
             for i in range(len(data[key])):
@@ -346,7 +346,7 @@ class FeatureExtraction(object):
 
 
 def get_train_test(data: dict, method_of_experiment: str, random_list: list):
-    #将所有数据分成训练集和测试集
+    # 将所有数据分成训练集和测试集
     train_data = dict()
     test_data = dict()
     key_list = list(data.keys())
@@ -359,7 +359,7 @@ def get_train_test(data: dict, method_of_experiment: str, random_list: list):
 
 
 def classification(feature, word2features: dict):
-    #根据提取的特征进行分类，利用欧式距离，找出最接近的标签
+    # 根据提取的特征进行分类，利用欧式距离，找出最接近的标签
     min_distance = np.linalg.norm(feature - word2features[list(word2features.keys())[0]])
     min_key = list(word2features.keys())[0]
     for key in word2features:
@@ -371,7 +371,7 @@ def classification(feature, word2features: dict):
 
 
 def test(test_data: dict, feature_extraction: FeatureExtraction, word2features: dict, method_of_experiment: str):
-    #对训练好的模型进行测试，返回准确率
+    # 对训练好的模型进行测试，返回准确率
     right_num = 0
     total_num = 0
     test_feature = feature_extraction.predict(test_data)
@@ -406,31 +406,31 @@ def train_and_test(original_data: dict, word2features: dict, verbs: list, normal
                    method_of_dimension_reduction: str,
                    method_of_normalization: str, method_of_feature_extraction: str, method_of_experiment: str,
                    random_list: list):
-    #对模型进行训练并对训练好的模型进行测试
+    # 对模型进行训练并对训练好的模型进行测试
     data = copy.deepcopy(original_data)
-    #获取测试数据和训练数据
+    # 获取测试数据和训练数据
     train_data, test_data = get_train_test(data, method_of_experiment, random_list)
-    #数据降维
+    # 数据降维
     dimension_reduction = DimensionReduction(method_of_dimension_reduction)
     dimension_reduction.fit(train_data)
     train_data = dimension_reduction.transform(train_data)
     test_data = dimension_reduction.transform(test_data)
-    #数据归一化
+    # 数据归一化
     if normalize:
         normalization = Norm(method_of_normalization)
         normalization.fit(train_data)
         train_data = normalization.norm(train_data)
         test_data = normalization.norm(test_data)
-    #训练模型
+    # 训练模型
     feature_extraction = FeatureExtraction(method_of_feature_extraction, word2features)
     feature_extraction.fit(train_data)
-    #测试模型
+    # 测试模型
     acc = test(test_data, feature_extraction, word2features, method_of_experiment)
     return acc
 
 
 if __name__ == '__main__':
-    #添加运行参数
+    # 添加运行参数
     args = parse_args()
     normalize = args.normalize
     method_of_dimension_reduction = args.method_of_dimension_reduction
@@ -438,7 +438,7 @@ if __name__ == '__main__':
     method_of_feature_extraction = args.method_of_feature_extraction
     method_of_experiment = args.method_of_experiment
     is_all = args.is_all
-    #加载数据
+    # 加载数据
     datas_dir = './data/data_science'
     verbs_dir = './data/verbs.pkl'
     word2features_dir = './data/word2features.pkl'
@@ -453,7 +453,7 @@ if __name__ == '__main__':
         data_f_read = open(data_dir, 'rb')
         data = pickle.load(data_f_read)
         datas.append(data)
-    #训练并测试
+    # 训练并测试
     accs = []
     if is_all:
         process_bar = tqdm(range(int(len(datas) * len(datas[0]) * (len(datas[0]) - 1) / 2)))
